@@ -30,15 +30,11 @@ export class AuthService {
   }
 
   async hashPassword(password: string): Promise<string> {
-    const saltRounds =
-      Number(this.configService.get<string>('BCRYPT_ROUNDS')) || 12;
+    const saltRounds = Number(this.configService.get<string>('BCRYPT_ROUNDS')) || 12;
     return await bcrypt.hash(password, saltRounds);
   }
 
-  async comparePassword(
-    password: string,
-    hashedPassword: string,
-  ): Promise<boolean> {
+  async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
     return await bcrypt.compare(password, hashedPassword);
   }
 }

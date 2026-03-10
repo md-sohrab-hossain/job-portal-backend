@@ -42,7 +42,8 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      'prettier/prettier': ['error', { endOfLine: 'auto' }],
+      '@typescript-eslint/ban-types': 'off',
+      'prettier/prettier': ['error', { endOfLine: 'auto', printWidth: 120 }],
     },
   },
 );
