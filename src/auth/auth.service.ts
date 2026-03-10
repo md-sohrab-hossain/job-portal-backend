@@ -1,31 +1,37 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { JwtSignOptions } from '@nestjs/jwt';
 
 import * as bcrypt from 'bcrypt';
+import { ITokenPayload } from '../common/types/api-response.interface';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
 
-  generateToken(userId: string, email: string): string {
-    return this.jwtService.sign(
-      { sub: userId, email },
-      { secret: this.configService.get<string>('JWT_SECRET'), expiresIn: '1h' },
-    );
+  generateToken(userId: string, email: string, expiresIn: string = '1h'): string {
+    const options: JwtSignOptions = {
+      secret: this.configService.get<string>('JWT_SECRET'),
+      expiresIn: expiresIn as any,
+    };
+
+    return this.jwtService.sign({ sub: userId, email }, options);
   }
 
-  async validateToken(token: string): Promise<boolean> {
+  async verifyToken(token: string): Promise<ITokenPayload | null> {
     try {
-      await this.jwtService.verifyAsync(token, {
+      const payload = await this.jwtService.verifyAsync<ITokenPayload>(token, {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
-      return true;
+      return payload;
     } catch {
-      return false;
+      return null;
     }
   }
 
@@ -34,7 +40,10 @@ export class AuthService {
     return await bcrypt.hash(password, saltRounds);
   }
 
-  async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
+  async comparePassword(password: string, hashedPassword: string | null): Promise<boolean> {
+    if (!hashedPassword) {
+      return false;
+    }
     return await bcrypt.compare(password, hashedPassword);
   }
 }
