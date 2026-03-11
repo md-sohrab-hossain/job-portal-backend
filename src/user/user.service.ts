@@ -203,7 +203,7 @@ export class UserService {
     };
   }
 
-  async refreshToken(refreshToken?: string): Promise<{ accessToken: string } | null> {
+  async refreshToken(refreshToken?: string): Promise<{ accessToken: string; refreshToken: string } | null> {
     if (!refreshToken) {
       return null;
     }
@@ -219,7 +219,8 @@ export class UserService {
     }
 
     const accessToken = this.authService.generateToken(user.id, user.email, user.role);
-    return { accessToken };
+    const newRefreshToken = this.authService.generateRefreshToken(user.id);
+    return { accessToken, refreshToken: newRefreshToken };
   }
 
   async updateProfile(id: string, updateUserDto: UpdateUserDto): Promise<IApiResponse<IUserResponse>> {
