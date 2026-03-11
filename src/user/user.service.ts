@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { RegisterUserDto, LoginUserDto } from './dto/user.dto';
+import { RegisterUserDto, LoginUserDto, UpdateUserDto } from './dto/user.dto';
 import { AuthService } from '../auth/auth.service';
 import { BruteForceService } from './brute-force.service';
 import { EmailService } from './email.service';
@@ -220,5 +220,42 @@ export class UserService {
 
     const accessToken = this.authService.generateToken(user.id, user.email, user.role);
     return { accessToken };
+  }
+
+  async updateProfile(id: string, updateUserDto: UpdateUserDto): Promise<IApiResponse<IUserResponse>> {
+    const { email, phoneNumber } = updateUserDto;
+
+    if (email) {
+      const existingUser = await this.prisma.user.findFirst({
+        where: { email, NOT: { id } },
+      });
+
+      if (existingUser) {
+        throw new BadRequestException('Email already in use');
+      }
+    }
+
+    if (phoneNumber) {
+      const existingPhone = await this.prisma.user.findFirst({
+        where: { phoneNumber, NOT: { id } },
+      });
+      if (existingPhone) {
+        throw new BadRequestException('Phone number already in use');
+      }
+    }
+
+    const updateData: any = { ...updateUserDto };
+    delete updateData.password;
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return {
+      success: true,
+      message: 'Profile updated successfully',
+      data: this.mapToUserResponse(updatedUser),
+    };
   }
 }

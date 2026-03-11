@@ -1,8 +1,22 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res, UseGuards, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Put,
+  Res,
+  UnauthorizedException,
+  UseGuards,
+  Query,
+  Req,
+} from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { UserService } from './user.service';
-import { RegisterUserDto, LoginUserDto } from './dto/user.dto';
+import { RegisterUserDto, LoginUserDto, UpdateUserDto } from './dto/user.dto';
 import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
+import { JwtAuthGuard } from '../auth/jwt.auth.guard';
 
 @Controller('user')
 @UseGuards(ThrottlerGuard)
@@ -100,5 +114,17 @@ export class UserController {
       success: true,
       message: 'Token refreshed successfully',
     };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('updateProfile')
+  @HttpCode(HttpStatus.OK)
+  async updateProfile(@Req() req: Request & { user?: { id: string } }, @Body() updateUserDto: UpdateUserDto) {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    return this.userService.updateProfile(userId, updateUserDto);
   }
 }
