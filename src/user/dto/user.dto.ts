@@ -1,5 +1,10 @@
-import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, MinLength } from 'class-validator';
+import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, Matches, MinLength } from 'class-validator';
 import { Role } from '@prisma/client';
+
+const passwordRequirements = {
+  message:
+    'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character',
+};
 
 export class LoginUserDto {
   @IsNotEmpty()
@@ -25,11 +30,13 @@ export class RegisterUserDto {
 
   @IsNotEmpty()
   @IsString()
+  @Matches(/^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/, { message: 'Invalid phone number format' })
   phoneNumber!: string;
 
   @IsNotEmpty()
   @IsString()
-  @MinLength(6)
+  @MinLength(8)
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, passwordRequirements)
   password!: string;
 
   @IsOptional()

@@ -17,6 +17,7 @@ export interface IRegisterResponse {
 
 export interface ILoginResponse extends IUserResponse {
   accessToken: string;
+  refreshToken: string;
 }
 
 export interface IApiResponse<T = unknown> {
@@ -29,6 +30,8 @@ export interface IApiResponse<T = unknown> {
 export interface ITokenPayload {
   sub: string;
   email: string;
+  role?: string;
+  type?: string;
   iat?: number;
   exp?: number;
 }

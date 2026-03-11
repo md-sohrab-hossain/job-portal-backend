@@ -25,6 +25,9 @@ model User {
   phoneNumber               String
   password                  String
   role                      Role          @default(student)
+  isVerified                Boolean       @default(false)
+  verificationToken         String?
+  verificationExpires       DateTime?
   profileBio                String?
   profileSkills             String[]
   profileResume             String?
