@@ -14,6 +14,15 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    "paths": {
+      "@auth/*": ["src/auth/*"],
+      "@config/*": ["src/config/*"],
+      "@common/*": ["src/common/*"],
+      "@user/*": ["src/user/*"],
+      "@prisma/*": ["src/prisma/*"],
+      "@prisma": ["src/prisma.module.ts"],
+      "@prisma/service": ["src/prisma.service.ts"]
+    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,

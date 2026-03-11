@@ -16,11 +16,11 @@ import type { Response } from 'express';
 import { UserService } from './user.service';
 import { RegisterUserDto, LoginUserDto, UpdateUserDto, UserResponseDto } from './dto/user.dto';
 import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
-import { JwtAuthGuard } from '../auth/jwt.auth.guard';
+import { JwtAuthGuard } from '@auth/jwt.auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { userControllerDocs } from '../config/docs/user.docs';
-import type { AuthenticatedRequest } from '../common/interfaces/auth.interface';
-import { setAuthCookies, clearAuthCookies } from '../common/helpers/cookie.helper';
+import { userControllerDocs } from '@config/docs/user.docs';
+import type { AuthenticatedRequest } from '@common/interfaces/auth.interface';
+import { setAuthCookies, clearAuthCookies } from '@common/helpers/cookie.helper';
 
 @ApiTags('User')
 @Controller('user')
@@ -97,7 +97,7 @@ export class UserController {
       return { success: false, message: 'Refresh token not found' };
     }
 
-    const newTokens = await this.userService.refreshToken(refreshToken as string);
+    const newTokens = await this.userService.refreshToken(refreshToken);
 
     if (!newTokens) {
       return { success: false, message: 'Invalid or expired refresh token' };
@@ -122,6 +122,6 @@ export class UserController {
       throw new UnauthorizedException('Invalid token');
     }
 
-    return this.userService.updateProfile(userId as string, updateUserDto);
+    return this.userService.updateProfile(userId, updateUserDto);
   }
 }

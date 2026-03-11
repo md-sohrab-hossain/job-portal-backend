@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtSignOptions } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
-import { ITokenPayload } from '../common/types/api-response.interface';
+import { ITokenPayload } from '@common/types/api-response.interface';
 import { Role } from '@prisma/client';
 
 @Injectable()

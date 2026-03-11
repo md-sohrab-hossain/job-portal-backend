@@ -1,11 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '@prisma/service';
 import { RegisterUserDto, LoginUserDto, UpdateUserDto } from './dto/user.dto';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '@auth/auth.service';
 import { BruteForceService } from './brute-force.service';
 import { EmailService } from './email.service';
 import { Role, User } from '@prisma/client';
-import { IApiResponse, IRegisterResponse, ILoginResponse, IUserResponse } from '../common/types/api-response.interface';
+import { IApiResponse, IRegisterResponse, ILoginResponse, IUserResponse } from '@common/types/api-response.interface';
 
 @Injectable()
 export class UserService {
