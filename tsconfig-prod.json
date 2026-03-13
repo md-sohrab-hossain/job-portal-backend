@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./dist",
+    "paths": {
+      "@auth/*": ["auth/*"],
+      "@config/*": ["config/*"],
+      "@common/*": ["common/*"],
+      "@user/*": ["user/*"],
+      "@prisma/*": ["*.js"],
+      "@prisma": ["prisma.module.js"],
+      "@prisma/service": ["prisma.service.js"]
+    }
+  }
+}

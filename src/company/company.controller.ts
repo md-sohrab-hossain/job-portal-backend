@@ -1,7 +1,7 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Get, Req, Post, Param, Delete, HttpCode, UseGuards, HttpStatus, Controller, Put } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { JwtAuthGuard } from '@auth/jwt.auth.guard';
-import { RegisterCompanyDto } from './dto/company.dto';
+import { RegisterCompanyDto, UpdateCompanyDto } from './dto/company.dto';
 import { Request } from 'express';
 
 interface AuthenticatedRequest extends Request {
@@ -23,6 +23,51 @@ export class CompanyController {
       message: 'Company created successfully',
       data: company,
       success: true,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':userId')
+  @HttpCode(HttpStatus.OK)
+  async getCompany(@Param('userId') userId: string) {
+    const company = await this.companyService.getCompany(userId);
+
+    return {
+      data: company,
+      success: true,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  async getCompanies(@Req() req: AuthenticatedRequest) {
+    const userId: string = req.user.id;
+    const companies = await this.companyService.getCompanies(userId);
+
+    return {
+      data: companies,
+      success: true,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteCompany(@Param('id') id: string) {
+    await this.companyService.deleteCompany(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put(':id')
+  @HttpCode(HttpStatus.OK)
+  async updateCompany(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
+    const company = await this.companyService.updateCompany(id, updateCompanyDto);
+
+    return {
+      data: company,
+      success: true,
+      message: 'Company updated successfully',
     };
   }
 }
