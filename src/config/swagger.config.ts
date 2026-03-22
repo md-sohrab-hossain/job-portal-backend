@@ -39,8 +39,10 @@ export const swaggerConfig = new DocumentBuilder()
   .setTitle('Job Portal API')
   .setDescription(description)
   .setVersion('1.0')
-  .addTag('Auth', 'Authentication: register, login, logout, refresh, verify-email')
-  .addTag('User', 'Profile management: updateProfile, resend-verification')
+  .addTag('User')
+  .addTag('Company')
+  .addTag('Job')
+  .addTag('Application')
   .addBearerAuth(
     {
       type: 'http',
