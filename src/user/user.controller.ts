@@ -94,12 +94,14 @@ export class UserController {
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
+      res.status(HttpStatus.UNAUTHORIZED);
       return { success: false, message: 'Refresh token not found' };
     }
 
     const newTokens = await this.userService.refreshToken(refreshToken);
 
     if (!newTokens) {
+      res.status(HttpStatus.UNAUTHORIZED);
       return { success: false, message: 'Invalid or expired refresh token' };
     }
 
