@@ -241,7 +241,7 @@ export class UserService {
     }
 
     try {
-      const payload = await this.authService.verifyToken(refreshToken);
+      const payload = await this.authService.verifyToken(refreshToken, true);
       if (!payload || payload.type !== 'refresh') {
         return null;
       }

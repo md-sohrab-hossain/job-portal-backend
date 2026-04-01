@@ -34,10 +34,13 @@ export class AuthService {
     return this.jwtService.sign({ sub: userId, type: 'refresh' }, options);
   }
 
-  async verifyToken(token: string): Promise<ITokenPayload | null> {
+  async verifyToken(token: string, isRefreshToken = false): Promise<ITokenPayload | null> {
     try {
+      const secret = isRefreshToken
+        ? this.configService.get<string>('JWT_REFRESH_SECRET')
+        : this.configService.get<string>('JWT_SECRET');
       const payload = await this.jwtService.verifyAsync<ITokenPayload>(token, {
-        secret: this.configService.get<string>('JWT_SECRET'),
+        secret,
       });
       return payload;
     } catch {
