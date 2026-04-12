@@ -2,39 +2,25 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { PrismaService } from '@prisma/service';
 import { RegisterCompanyDto, UpdateCompanyDto } from './dto/company.dto';
 
-const OBJECT_ID_PATTERN = /^[a-fA-F0-9]{24}$/;
 
 @Injectable()
 export class CompanyService {
   private readonly logger = new Logger(CompanyService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
-  private isValidObjectId(id: string): boolean {
-    return OBJECT_ID_PATTERN.test(id);
-  }
 
   async registerCompany(userId: string, registerCompanyDto: RegisterCompanyDto) {
     const { name, description, website, location, logo } = registerCompanyDto;
 
     try {
-      const [existingCompany, existingUserCompany] = await Promise.all([
-        this.prisma.company.findUnique({
-          where: { name },
-        }),
-        this.prisma.company.findFirst({
-          where: { userId },
-        }),
-      ]);
+      const existingCompany = await this.prisma.company.findUnique({
+        where: { name },
+      })
 
       if (existingCompany) {
         this.logger.warn(`Company name already exists: ${name}`);
         throw new BadRequestException('A company with this name already exists');
-      }
-
-      if (existingUserCompany) {
-        this.logger.warn(`User ${userId} already has a company`);
-        throw new BadRequestException('You have already registered a company');
       }
 
       const company = await this.prisma.company.create({
@@ -54,7 +40,7 @@ export class CompanyService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      this.logger.error(`Failed to register company: ${error.message}`, error.stack);
+      this.logger.error(`Failed to register company`);
       throw new BadRequestException('Failed to register company');
     }
   }
@@ -75,7 +61,7 @@ export class CompanyService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      this.logger.error(`Failed to get companies: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get companies`);
       throw new BadRequestException('Failed to retrieve companies');
     }
   }
@@ -95,7 +81,7 @@ export class CompanyService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      this.logger.error(`Failed to get company: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get company`);
       throw new BadRequestException('Failed to retrieve company');
     }
   }
@@ -112,7 +98,7 @@ export class CompanyService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      this.logger.error(`Failed to delete company: ${error.message}`, error.stack);
+      this.logger.error(`Failed to delete company`);
       throw new BadRequestException('Failed to delete company');
     }
   }
@@ -133,7 +119,7 @@ export class CompanyService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      this.logger.error(`Failed to update company: ${error.message}`, error.stack);
+      this.logger.error(`Failed to update company`);
       throw new BadRequestException('Failed to update company');
     }
   }
