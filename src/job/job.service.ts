@@ -189,4 +189,48 @@ export class JobService {
       throw new NotFoundException('Job not found or not authorized');
     }
   }
+
+  async updateJob(jobId: string, userId: string, updateJobDto: PostJobDto) {
+    const { title, description, requirements, salary, location, jobType, experienceLevel, position, companyId } =
+      updateJobDto;
+
+    try {
+      // Small verification to ensure job exists and belongs to user
+      const existingJob = await this.prisma.job.findUnique({
+        where: { id: jobId },
+      });
+
+      if (!existingJob) {
+        throw new NotFoundException('Job not found');
+      }
+
+      if (existingJob.createdById !== userId) {
+        throw new BadRequestException('Not authorized to update this job');
+      }
+
+      const job = await this.prisma.job.update({
+        where: { id: jobId },
+        data: {
+          title,
+          description,
+          requirements,
+          salary,
+          location,
+          jobType,
+          experienceLevel,
+          position,
+          companyId,
+        },
+      });
+
+      this.logger.log(`Job updated successfully: ${job.id}`);
+      return job;
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to update job: ${error.message}`, error.stack);
+      throw new BadRequestException('Failed to update job');
+    }
+  }
 }

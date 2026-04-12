@@ -10,6 +10,7 @@ import {
   Controller,
   Param,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { JobService } from './job.service';
 import { JwtAuthGuard } from '@auth/jwt.auth.guard';
@@ -114,6 +115,29 @@ export class JobController {
       data: result,
       success: true,
       message: 'Job deleted successfully',
+    };
+  }
+  
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update a job listing' })
+  @ApiResponse({ status: 200, description: 'Job updated successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Job not found' })
+  async updateJob(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') jobId: string,
+    @Body() updateJobDto: PostJobDto,
+  ) {
+    const userId = req.user.id;
+    const job = await this.jobService.updateJob(jobId, userId, updateJobDto);
+    return {
+      message: 'Job updated successfully',
+      data: job,
+      success: true,
     };
   }
 
