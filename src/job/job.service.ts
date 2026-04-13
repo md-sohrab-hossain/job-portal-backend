@@ -174,19 +174,22 @@ export class JobService {
   }
 
   async deleteJob(jobId: string, userId: string) {
+    // 1. Ownership & existence check (single query)
+    const job = await this.prisma.job.findUnique({ where: { id: jobId } });
+
+    if (!job) throw new NotFoundException('Job listing not found');
+    if (job.createdById !== userId) throw new BadRequestException('Unauthorized deletion attempt');
+
+    // 2. Atomic cleanup and deletion
     try {
-      return await this.prisma.job.delete({
-        where: {
-          id: jobId,
-          createdById: userId,
-        },
+      return await this.prisma.$transaction(async (tx) => {
+        await tx.application.deleteMany({ where: { jobId } });
+        await tx.favorite.deleteMany({ where: { jobId } });
+        return await tx.job.delete({ where: { id: jobId } });
       });
     } catch (error) {
-      if (error instanceof BadRequestException || error instanceof NotFoundException) {
-        throw error;
-      }
-
-      throw new NotFoundException('Job not found or not authorized');
+      this.logger.error(`Critical failure deleting job ${jobId}: ${error.message}`);
+      throw new BadRequestException('Could not complete job deletion sequence');
     }
   }
 
