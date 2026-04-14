@@ -120,7 +120,7 @@ export class JobService {
     try {
       const jobs = await this.prisma.job.findMany({
         where: { createdById },
-        include: { company: true },
+        include: { company: true, applications: true },
         orderBy: { createdAt: 'desc' },
       });
 

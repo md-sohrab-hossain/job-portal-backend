@@ -6,6 +6,7 @@ import {
   Post,
   Body,
   Query,
+  Param,
   HttpCode,
   UseGuards,
   HttpStatus,
@@ -26,7 +27,7 @@ import { setAuthCookies, clearAuthCookies } from '@common/helpers/cookie.helper'
 @Controller('user')
 @UseGuards(ThrottlerGuard)
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
@@ -120,10 +121,38 @@ export class UserController {
   async updateProfile(@Req() req: AuthenticatedRequest, @Body() updateUserDto: UpdateUserDto) {
     const userId = req.user?.id;
 
+
     if (!userId) {
       throw new UnauthorizedException('Invalid token');
     }
 
     return this.userService.updateProfile(userId, updateUserDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, description: 'Current user profile retrieved successfully', type: UserResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getCurrentUser(@Req() req: AuthenticatedRequest) {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    return this.userService.getUserById(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get user profile by ID' })
+  @ApiResponse({ status: 200, description: 'User profile retrieved successfully', type: UserResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async getUserById(@Param('id') id: string) {
+    return this.userService.getUserById(id);
   }
 }

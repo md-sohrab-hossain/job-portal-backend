@@ -16,7 +16,7 @@ export class UserService {
     private readonly authService: AuthService,
     private readonly bruteForceService: BruteForceService,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   private mapToUserResponse(user: User): IUserResponse {
     return {
@@ -261,7 +261,7 @@ export class UserService {
   }
 
   async updateProfile(id: string, updateUserDto: UpdateUserDto): Promise<IApiResponse<IUserResponse>> {
-    const { email, phoneNumber } = updateUserDto;
+    const { email } = updateUserDto;
 
     try {
       if (email) {
@@ -274,14 +274,6 @@ export class UserService {
         }
       }
 
-      if (phoneNumber) {
-        const existingPhone = await this.prisma.user.findFirst({
-          where: { phoneNumber, NOT: { id } },
-        });
-        if (existingPhone) {
-          throw new BadRequestException('Phone number already in use');
-        }
-      }
 
       const updateData: any = { ...updateUserDto };
       delete updateData.password;
@@ -296,12 +288,39 @@ export class UserService {
         message: 'Profile updated successfully',
         data: this.mapToUserResponse(updatedUser),
       };
+    } catch (error: any) {
+      if (error instanceof BadRequestException) {
+        this.logger.warn(`Bad request updating profile for user ${id}: ${error.message}`);
+        throw error;
+      }
+      this.logger.error(`Failed to update profile for user ${id}: ${error.message}`, error.stack);
+      throw new BadRequestException(`Failed to update profile: ${error.message}`);
+    }
+
+  }
+
+  async getUserById(id: string): Promise<IApiResponse<IUserResponse>> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id },
+      });
+
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+
+      return {
+        success: true,
+        message: 'User found',
+        data: this.mapToUserResponse(user),
+      };
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      this.logger.error(`Failed to update profile: ${error.message}`, error.stack);
-      throw new BadRequestException('Failed to update profile');
+      this.logger.error(`Failed to fetch user by id ${id}: ${error.message}`, error.stack);
+      throw new BadRequestException('Failed to fetch user profile');
     }
   }
 }
+
