@@ -1,98 +1,117 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# CareerPulse Backend - Enterprise Job Portal API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+[![NestJS](https://img.shields.io/badge/NestJS-11.x-E0234E?logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Database-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Security](https://img.shields.io/badge/Security-Hardened-green)](https://docs.nestjs.com/security/throttler)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+A robust, enterprise-grade RESTful API powering the CareerPulse Job Portal. Built with **NestJS 11**, this backend emphasizes security, scalability, and modular system design.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🏗️ Architectural Overview
 
-## Project setup
+The system is built on a **Modular Hexagonal-inspired Architecture**, ensuring strict separation of concerns and high maintainability.
 
-```bash
-$ pnpm install
+```mermaid
+graph TD
+    subgraph Layers ["Request Lifecycle"]
+        REQ["HTTP Request"]
+        THROTTLE["Throttler (Rate Limit)"]
+        GUARD["Auth Guard (JWT)"]
+        INTERCEPT["Interceptors (Response/Logging)"]
+        CONTROLLER["Controllers (Route Handlers)"]
+        SERVICE["Business Logic (Services)"]
+        PRISMA["Prisma ORM"]
+        DB[(MongoDB)]
+
+        REQ --> THROTTLE
+        THROTTLE --> GUARD
+        GUARD --> INTERCEPT
+        INTERCEPT --> CONTROLLER
+        CONTROLLER --> SERVICE
+        SERVICE --> PRISMA
+        PRISMA --> DB
+    end
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ pnpm run start
+## 🛡️ Enterprise Security Hardening
 
-# watch mode
-$ pnpm run start:dev
+As a production-ready system, CareerPulse implements several critical security patterns:
 
-# production mode
-$ pnpm run start:prod
+- **Brute Force Mitigation:** Custom `BruteForceService` tracks login attempts and implements exponential backoff/blocking for suspicious IP/Email patterns.
+- **JWT Rotation & Refresh:** Implements secure JWT handshakes with `accessToken` and `refreshToken` rotation to minimize session hijacking risks.
+- **Multi-tiered Throttling:** Configured with `short` (high-frequency), `medium`, and `long` term rate limits to protect against DDoS and scraping.
+- **Credential Safety:** Industry-standard password hashing using `bcrypt` and secure `HttpOnly` cookie management.
+- **Input Validation:** Global `ValidationPipe` with strict white-listing to prevent SQL/NoSQL injection and data corruption.
+
+---
+
+## ✨ Core Features
+
+- **Auth System:** Email verification flow, password recovery, and role-based access control (Student vs Recruiter).
+- **Job Management:** Optimized relational queries for job postings, filtering, and application tracking.
+- **Company Orchestration:** Unified management for recruiters to handle multiple companies.
+- **Asynchronous Workflows:** Integrated `EmailService` for non-blocking notifications.
+- **Monitoring:** Systematic use of the NestJS `Logger` for comprehensive system auditing and error tracking.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework:** NestJS 11 (Node.js)
+- **Database:** MongoDB
+- **ORM:** Prisma
+- **Auth:** Passport.js + JWT
+- **Documentation:** Swagger UI (OpenAPI 3.0)
+- **Testing:** Jest + Supertest (Unit & E2E)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 20+
+- MongoDB instance (Atlas or Local)
+- Docker (Optional)
+
+### Environment Setup
+Create a `.env` file in the root:
+```env
+DATABASE_URL="mongodb+srv://..."
+JWT_SECRET="your-super-secret"
+JWT_REFRESH_SECRET="another-secret"
+PORT=3000
+NODE_ENV=development
 ```
 
-## Run tests
-
+### Installation
 ```bash
-# unit tests
-$ pnpm run test
+# Install dependencies
+npm install
 
-# e2e tests
-$ pnpm run test:e2e
+# Generate Prisma Client
+npx prisma generate
 
-# test coverage
-$ pnpm run test:cov
+# Start development
+npm run start:dev
 ```
 
-## Deployment
+### API Documentation
+Once running, visit: `http://localhost:3000/api/docs` to view the comprehensive Swagger documentation.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+---
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 🐳 Docker Deployment
 
+Full orchestration is available via Docker Compose:
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+docker-compose up --build
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 📝 License
+This project is [UNLICENSED](LICENSE).
